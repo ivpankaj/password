@@ -6,6 +6,7 @@ import { getServerSession } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import crypto from "crypto"
 import { ObjectId } from "mongodb"
+import bcrypt from "bcryptjs"
 
 // Properly handle the encryption key for AES-256-CBC (needs 32 bytes)
 const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY 
@@ -164,5 +165,65 @@ export async function deletePassword(id: string) {
   } catch (error) {
     console.error("Delete password error:", error)
     return { success: false, error: "Failed to delete password" }
+  }
+}
+
+
+
+
+// In your passwords.js server action file
+export async function changePassword(currentPassword: string, newPassword: string) {
+  const session = await getServerSession();
+  
+  console.log("Change password called with session:", session ? "Session exists" : "No session");
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  try {
+    const { db } = await connectToDatabase();
+    console.log("Database connected");
+
+    // Get the current user
+    const user = await db.collection("users").findOne({
+      _id: new ObjectId(session.user.id),
+    });
+
+    console.log("User found:", user ? "Yes" : "No");
+
+    if (!user) {
+      return { success: false, error: "User not found" };
+    }
+
+    // Import bcrypt at the top of your file instead of here
+    const isValid = await bcrypt.compare(currentPassword, user.password);
+    console.log("Password validation:", isValid ? "Valid" : "Invalid");
+
+    if (!isValid) {
+      return { success: false, error: "Current password is incorrect" };
+    }
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    console.log("New password hashed");
+
+    // Update the user's password
+    const result = await db.collection("users").updateOne(
+      { _id: new ObjectId(session.user.id) },
+      { 
+        $set: { 
+          password: hashedPassword,
+          updatedAt: new Date()
+        } 
+      }
+    );
+    
+    console.log("Update result:", result.modifiedCount > 0 ? "Password updated" : "No update occurred");
+
+    revalidatePath("/dashboard");
+    return { success: result.modifiedCount > 0, error: result.modifiedCount === 0 ? "No changes made" : "" };
+  } catch (error) {
+    console.error("Change password error details:", error);
+    return { success: false, error: "Failed to change password: " + (error instanceof Error ? error.message : "Unknown error") };
   }
 }

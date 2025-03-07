@@ -9,7 +9,7 @@ export default function Home() {
         <div className="container flex h-14 items-center">
           <div className="flex items-center gap-2 font-bold">
             <Shield className="h-5 w-5 text-primary" />
-            <span>PassVault</span>
+            <span>Passkar</span>
           </div>
           <div className="flex flex-1 items-center justify-end space-x-2">
             <Link href="/login">
@@ -114,7 +114,7 @@ export default function Home() {
       <footer className="border-t py-6 md:py-0">
         <div className="container flex flex-col items-center justify-between gap-4 md:h-16 md:flex-row">
           <p className="text-center text-sm leading-loose text-muted-foreground md:text-left">
-            © 2024 PassVault. All rights reserved.
+            © 2024 Passkar. All rights reserved.  <span className="text-red-600">Design and Develop by <span className="text-purple-600">Pankaj </span></span>
           </p>
         </div>
       </footer>

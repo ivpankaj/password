@@ -1,10 +1,11 @@
 "use server"
 
 import { cookies } from "next/headers"
-import { SignJWT } from "jose"
+import { jwtVerify, SignJWT } from "jose"
 import { z } from "zod"
 import { connectToDatabase } from "@/lib/mongodb"
 import bcrypt from "bcryptjs"
+import { ObjectId } from "mongodb"
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"
 
@@ -135,3 +136,72 @@ async function createToken(payload: { sub: string; name: string; email: string }
     .sign(new TextEncoder().encode(JWT_SECRET))
 }
 
+
+
+// Function to get the current user from the JWT token
+export async function getCurrentUser() {
+  try {
+    // Get the auth token from cookies
+    const token = cookies().get("auth-token")?.value
+
+    // If no token exists, user is not authenticated
+    if (!token) {
+      return null
+    }
+
+    // Verify and decode the token
+    const verified = await jwtVerify(
+      token, 
+      new TextEncoder().encode(JWT_SECRET)
+    )
+
+    // Extract user data from the payload
+    const payload = verified.payload
+    
+    return {
+      id: payload.sub as string,
+      name: payload.name as string,
+      email: payload.email as string,
+    }
+  } catch (error) {
+    console.error("Error getting current user:", error)
+    return null
+  }
+}
+
+// Function to get full user data from the database
+export async function getUserProfile() {
+  try {
+    // Get basic user info from the token
+    const user = await getCurrentUser()
+    
+    // If no user is authenticated, return null
+    if (!user) {
+      return null
+    }
+    
+    // Connect to the database
+    const { db } = await connectToDatabase()
+    
+    // Find the user in the database using their ID
+    const userData = await db.collection("users").findOne(
+      { _id: new ObjectId(user.id) },
+      { projection: { password: 0 } } // Exclude the password field
+    )
+    
+    if (!userData) {
+      return null
+    }
+    
+    // Return the user data with properly formatted ID
+    return {
+      id: userData._id.toString(),
+      name: userData.name,
+      email: userData.email,
+      // Include any other user fields you need here
+    }
+  } catch (error) {
+    console.error("Error fetching user profile:", error)
+    return null
+  }
+}

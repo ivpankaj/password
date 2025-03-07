@@ -73,11 +73,6 @@ export default function LoginForm() {
         <Label htmlFor="password">Password</Label>
         <Input id="password" name="password" type="password" required />
       </div>
-      <div className="flex items-center justify-end">
-        <Button variant="link" className="px-0" asChild>
-          <a href="/forgot-password">Forgot password?</a>
-        </Button>
-      </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? "Signing in..." : "Sign in"}
       </Button>

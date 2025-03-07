@@ -10,7 +10,7 @@ export default function LoginPage() {
           <div className="flex flex-col items-center space-y-2 text-center">
             <Link href="/" className="flex items-center gap-2 font-bold">
               <Shield className="h-6 w-6 text-primary" />
-              <span className="text-xl">PassVault</span>
+              <span className="text-xl">Passkar</span>
             </Link>
             <h1 className="text-2xl font-bold">Login to your account</h1>
             <p className="text-muted-foreground">Enter your credentials to access your account</p>

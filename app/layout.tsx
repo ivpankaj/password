@@ -6,9 +6,9 @@ import { Inter } from "next/font/google"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "PassVault - Secure Password Manager",
+  title: "Passkar - Mere Pass",
   description: "Store your social media passwords securely",
-    generator: 'v0.dev'
+    generator: 'Design and Developed by Pankaj'
 }
 
 export default function RootLayout({
