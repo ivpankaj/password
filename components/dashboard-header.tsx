@@ -20,7 +20,7 @@ interface User {
 
 export default function DashboardHeader({ user }: { user?: User }) {
   // Add a default fallback value for initials if user is undefined
-  console.log("user2",user)
+  // console.log("user2",user)
   const initials = user?.name
     ? user.name
         .split(" ")

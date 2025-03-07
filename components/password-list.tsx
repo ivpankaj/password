@@ -34,7 +34,7 @@ export default function PasswordList({ userId }: PasswordListProps) {
         setLoading(true)
         // Use your server action to fetch passwords
         const passwordData = await getPasswords(userId)
-        console.log("Fetched passwords:", passwordData) // Debug log
+        // console.log("Fetched passwords:", passwordData) // Debug log
         
         // Transform the data to match the Password type
         const transformedPasswords: Password[] = passwordData.map((p: PasswordResponse) => ({

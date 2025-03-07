@@ -175,7 +175,7 @@ export async function deletePassword(id: string) {
 export async function changePassword(currentPassword: string, newPassword: string) {
   const session = await getServerSession();
   
-  console.log("Change password called with session:", session ? "Session exists" : "No session");
+  // console.log("Change password called with session:", session ? "Session exists" : "No session");
 
   if (!session) {
     redirect("/login");
@@ -183,14 +183,14 @@ export async function changePassword(currentPassword: string, newPassword: strin
 
   try {
     const { db } = await connectToDatabase();
-    console.log("Database connected");
+    // console.log("Database connected");
 
     // Get the current user
     const user = await db.collection("users").findOne({
       _id: new ObjectId(session.user.id),
     });
 
-    console.log("User found:", user ? "Yes" : "No");
+    // console.log("User found:", user ? "Yes" : "No");
 
     if (!user) {
       return { success: false, error: "User not found" };
@@ -198,14 +198,14 @@ export async function changePassword(currentPassword: string, newPassword: strin
 
     // Import bcrypt at the top of your file instead of here
     const isValid = await bcrypt.compare(currentPassword, user.password);
-    console.log("Password validation:", isValid ? "Valid" : "Invalid");
+    // console.log("Password validation:", isValid ? "Valid" : "Invalid");
 
     if (!isValid) {
       return { success: false, error: "Current password is incorrect" };
     }
     // Hash the new password
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-    console.log("New password hashed");
+    // console.log("New password hashed");
 
     // Update the user's password
     const result = await db.collection("users").updateOne(
@@ -218,7 +218,7 @@ export async function changePassword(currentPassword: string, newPassword: strin
       }
     );
     
-    console.log("Update result:", result.modifiedCount > 0 ? "Password updated" : "No update occurred");
+    // console.log("Update result:", result.modifiedCount > 0 ? "Password updated" : "No update occurred");
 
     revalidatePath("/dashboard");
     return { success: result.modifiedCount > 0, error: result.modifiedCount === 0 ? "No changes made" : "" };

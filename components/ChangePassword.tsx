@@ -19,7 +19,7 @@ interface ChangePasswordProps {
 }
 
 export default function ChangePassword({ user }: ChangePasswordProps) {
-  console.log("ChangePassword rendering with user:", user);
+  // console.log("ChangePassword rendering with user:", user);
   
   const { toast } = useToast();
   const router = useRouter();
@@ -42,7 +42,7 @@ export default function ChangePassword({ user }: ChangePasswordProps) {
 
   // Effect to log user data when it changes
   useEffect(() => {
-    console.log("User data in ChangePassword effect:", user);
+    // console.log("User data in ChangePassword effect:", user);
   }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,10 +112,10 @@ export default function ChangePassword({ user }: ChangePasswordProps) {
     setIsLoading(true);
     
     try {
-      console.log("Submitting password change with values:", {
-        currentPassword: formValues.currentPassword ? "Provided" : "Empty",
-        newPassword: formValues.newPassword ? "Provided" : "Empty",
-      });
+      // console.log("Submitting password change with values:", {
+      //   currentPassword: formValues.currentPassword ? "Provided" : "Empty",
+      //   newPassword: formValues.newPassword ? "Provided" : "Empty",
+      // });
   
       const result = await changePassword(
         formValues.currentPassword,
