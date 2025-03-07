@@ -110,30 +110,23 @@ export default function About() {
         </section>
 
         <section className="w-full py-12 md:py-24 lg:py-32">
-          <div className="container px-4 md:px-6">
-            <div className="mx-auto max-w-3xl text-center">
-              <h2 className="text-3xl font-bold tracking-tighter mb-8">Connect With Me</h2>
-              <div className="flex justify-center space-x-6">
-                <Link href="https://github.com" className="rounded-full bg-muted p-3 hover:bg-muted/80 transition-colors">
-                  <Github className="h-6 w-6" />
-                </Link>
-                <Link href="https://linkedin.com" className="rounded-full bg-muted p-3 hover:bg-muted/80 transition-colors">
-                  <Linkedin className="h-6 w-6" />
-                </Link>
-                <Link href="https://twitter.com" className="rounded-full bg-muted p-3 hover:bg-muted/80 transition-colors">
-                  <Twitter className="h-6 w-6" />
-                </Link>
-              </div>
-              <div className="mt-12">
-                <Link href="/">
-                  <Button size="lg" className="mx-auto">
-                    Back to Home
-                  </Button>
-                </Link>
-              </div>
+        <div className="container px-4 md:px-6">
+          <div className="mx-auto max-w-3xl text-center">
+            <h2 className="text-3xl font-bold tracking-tighter mb-8">Connect With Me</h2>
+            <div className="flex justify-center space-x-6">
+              <Link href="https://github.com/ivpankaj" className="rounded-full bg-muted p-3 hover:bg-muted/80 transition-colors">
+                <Github className="h-6 w-6" />
+              </Link>
+              <Link href="https://linkedin.com/in/ivpankaj15" className="rounded-full bg-muted p-3 hover:bg-muted/80 transition-colors">
+                <Linkedin className="h-6 w-6" />
+              </Link>
+              <Link href="https://x.com/ivpankaj" className="rounded-full bg-muted p-3 hover:bg-muted/80 transition-colors">
+                <Twitter className="h-6 w-6" />
+              </Link>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
       </main>
       
       <footer className="border-t py-6 md:py-0">
