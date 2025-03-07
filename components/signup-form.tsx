@@ -1,15 +1,14 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { z } from "zod"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
+import { AlertCircle, Loader2 } from "lucide-react"
 import { signUp } from "@/lib/actions/auth"
 
 const signupSchema = z.object({
@@ -26,6 +25,7 @@ const signupSchema = z.object({
 export default function SignupForm() {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const [errors, setErrors] = useState<Record<string, string>>({})
   const [generalError, setGeneralError] = useState("")
 
@@ -50,7 +50,11 @@ export default function SignupForm() {
       const result = await signUp(data)
 
       if (result.success) {
-        router.push("/dashboard")
+        setIsRedirecting(true)
+        // Short delay before redirecting to simulate loading and ensure state updates
+        setTimeout(() => {
+          router.push("/dashboard")
+        }, 500)
       } else {
         setGeneralError(result.error || "Something went wrong. Please try again.")
       }
@@ -67,8 +71,21 @@ export default function SignupForm() {
         setGeneralError("Something went wrong. Please try again.")
       }
     } finally {
-      setIsLoading(false)
+      if (!isRedirecting) {
+        setIsLoading(false)
+      }
     }
+  }
+
+  if (isRedirecting) {
+    return (
+      <div className="flex flex-col items-center justify-center space-y-4 p-8">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <p className="text-center text-lg font-medium">
+          Account created successfully! Redirecting to dashboard...
+        </p>
+      </div>
+    )
   }
 
   return (
@@ -95,9 +112,15 @@ export default function SignupForm() {
         {errors.password && <p className="text-sm text-destructive">{errors.password}</p>}
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Creating account..." : "Create account"}
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Creating account...
+          </>
+        ) : (
+          "Create account"
+        )}
       </Button>
     </form>
   )
 }
-
