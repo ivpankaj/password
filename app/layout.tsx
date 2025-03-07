@@ -6,7 +6,7 @@ import { Inter } from "next/font/google"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Passkar - Mere Pass",
+  title: "Passkar - Safe and Secure Password Manager",
   description: "Store your social media passwords securely",
     generator: 'Design and Developed by Pankaj'
 }
