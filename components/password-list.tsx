@@ -23,55 +23,82 @@ interface PasswordListProps {
   userId: string;
 }
 
+// Create a context or event system to trigger refetches
+// This is a simple event bus for this component
+const passwordEvents = {
+  listeners: new Set<() => void>(),
+  subscribe(listener: () => void) {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  },
+  emit() {
+    this.listeners.forEach(listener => listener());
+  }
+};
+
+// Export the trigger function to be called from other components
+export function refreshPasswordList() {
+  passwordEvents.emit();
+}
+
 export default function PasswordList({ userId }: PasswordListProps) {
   const [passwords, setPasswords] = useState<Password[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   
-  useEffect(() => {
-    const fetchPasswords = async () => {
-      try {
-        setLoading(true)
-        // Use your server action to fetch passwords
-        const passwordData = await getPasswords(userId)
-        // console.log("Fetched passwords:", passwordData) // Debug log
-        
-        // Transform the data to match the Password type
-        const transformedPasswords: Password[] = passwordData.map((p: PasswordResponse) => ({
-          id: p.id,
-          name: p.platform || "Unknown",
-          value: p.password,
-          platform: p.platform || "Unknown",
-          username: p.username || "",
-          password: p.password,
-          url: p.url || "",
-          createdAt: (p.createdAt ? p.createdAt.toISOString() : new Date().toISOString()),
-          updatedAt: (p.updatedAt ? p.updatedAt.toISOString() : new Date().toISOString())
-        }));
-        
-        setPasswords(transformedPasswords)
-      } catch (err) {
-        console.error("Failed to fetch passwords:", err)
-        if (err instanceof Error) {
-          setError(err.message || "Failed to load passwords")
-        } else {
-          setError("Failed to load passwords")
-        }
-      } finally {
-        setLoading(false)
-      }
-    }
+  const fetchPasswords = async () => {
+    if (!userId) return;
     
-    if (userId) {
-      fetchPasswords()
+    try {
+      setLoading(true)
+      // Use your server action to fetch passwords
+      const passwordData = await getPasswords(userId)
+      
+      // Transform the data to match the Password type
+      const transformedPasswords: Password[] = passwordData.map((p: PasswordResponse) => ({
+        id: p.id,
+        name: p.platform || "Unknown",
+        value: p.password,
+        platform: p.platform || "Unknown",
+        username: p.username || "",
+        password: p.password,
+        url: p.url || "",
+        createdAt: (p.createdAt ? p.createdAt.toISOString() : new Date().toISOString()),
+        updatedAt: (p.updatedAt ? p.updatedAt.toISOString() : new Date().toISOString())
+      }));
+      
+      setPasswords(transformedPasswords)
+      setError(null)
+    } catch (err) {
+      console.error("Failed to fetch passwords:", err)
+      if (err instanceof Error) {
+        setError(err.message || "Failed to load passwords")
+      } else {
+        setError("Failed to load passwords")
+      }
+    } finally {
+      setLoading(false)
     }
-  }, [userId])
-  
-  if (loading) {
-    return <PasswordListSkeleton />
   }
   
-  if (error) {
+  useEffect(() => {
+    fetchPasswords()
+    
+    // Subscribe to password events
+    const unsubscribe = passwordEvents.subscribe(() => {
+      fetchPasswords()
+    })
+    
+    return () => {
+      unsubscribe();
+    }
+  }, [userId])
+
+  if (loading && passwords.length === 0) {
+    return <PasswordListSkeleton />
+  }
+
+  if (error && passwords.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-center">
         <h3 className="text-lg font-medium text-destructive">Error loading passwords</h3>
@@ -79,7 +106,7 @@ export default function PasswordList({ userId }: PasswordListProps) {
       </div>
     )
   }
-  
+
   return <PasswordCardList passwords={passwords} />
 }
 

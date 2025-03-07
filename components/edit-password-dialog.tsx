@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { updatePassword } from "@/lib/actions/passwords"
+import { refreshPasswordList } from "./password-list"
 
 interface Password {
   id: string;
@@ -52,11 +53,14 @@ export default function EditPasswordDialog({ password, isOpen, onClose }: EditPa
       const result = await updatePassword(password.id, formData)
       
       if (result.success) {
+     
         toast({
           title: "Password updated",
           description: "Your password has been successfully updated.",
         })
+  
         onClose()
+        refreshPasswordList()
       } else {
         throw new Error(result.error || "Failed to update password")
       }

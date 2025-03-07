@@ -4,10 +4,18 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button"
 import { Eye, EyeOff, Pencil, Trash } from "lucide-react"
 import { useState } from "react"
-import { useToast } from "./ui/use-toast"
 import { deletePassword } from "@/lib/actions/passwords"
 import EditPasswordDialog from "./edit-password-dialog"
-
+import { refreshPasswordList } from "./password-list"
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle 
+} from "@/components/ui/alert-dialog"
 
 export interface Password {
   id: string
@@ -45,32 +53,38 @@ function PasswordCard({ password }: { password: Password }) {
   const [showPassword, setShowPassword] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [isEditOpen, setIsEditOpen] = useState(false)
-  const { toast } = useToast()
+  const [alertOpen, setAlertOpen] = useState(false)
+  const [alertMessage, setAlertMessage] = useState({ title: "", description: "" })
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false)
+
+  const showAlert = (title: string, description: string) => {
+    setAlertMessage({ title, description })
+    setAlertOpen(true)
+  }
 
   const handleDelete = async () => {
-    if (confirm("Are you sure you want to delete this password?")) {
-      try {
-        setIsDeleting(true)
-        const result = await deletePassword(password.id)
-        
-        if (result.success) {
-          toast({
-            title: "Password deleted",
-            description: "Your password has been successfully deleted.",
-          })
-        } else {
-          throw new Error(result.error || "Failed to delete password")
-        }
-      } catch (error) {
-        console.error("Error deleting password:", error)
-        toast({
-          title: "Error",
-          description: (error instanceof Error ? error.message : "Failed to delete password"),
-          variant: "destructive",
-        })
-      } finally {
-        setIsDeleting(false)
+    try {
+      setIsDeleting(true)
+      const result = await deletePassword(password.id)
+      
+      if (result.success) {
+        showAlert(
+          "Password deleted", 
+          "Your password has been successfully deleted."
+        )
+        refreshPasswordList()
+      } else {
+        throw new Error(result.error || "Failed to delete password")
       }
+    } catch (error) {
+      console.error("Error deleting password:", error)
+      showAlert(
+        "Error", 
+        (error instanceof Error ? error.message : "Failed to delete password")
+      )
+    } finally {
+      setIsDeleting(false)
+      setConfirmDeleteOpen(false)
     }
   }
 
@@ -95,7 +109,7 @@ function PasswordCard({ password }: { password: Password }) {
                 variant="ghost" 
                 size="icon" 
                 className="h-8 w-8 text-destructive"
-                onClick={handleDelete}
+                onClick={() => setConfirmDeleteOpen(true)}
                 disabled={isDeleting}
               >
                 <Trash className="h-4 w-4" />
@@ -128,7 +142,7 @@ function PasswordCard({ password }: { password: Password }) {
                   className="h-6 px-2"
                   onClick={() => {
                     navigator.clipboard.writeText(password.username)
-                    toast({ description: "Username copied to clipboard" })
+                    showAlert("Copied", "Username copied to clipboard")
                   }}
                 >
                   Copy
@@ -155,7 +169,7 @@ function PasswordCard({ password }: { password: Password }) {
                     className="h-6 px-2"
                     onClick={() => {
                       navigator.clipboard.writeText(password.password)
-                      toast({ description: "Password copied to clipboard" })
+                      showAlert("Copied", "Password copied to clipboard")
                     }}
                   >
                     Copy
@@ -172,6 +186,7 @@ function PasswordCard({ password }: { password: Password }) {
         </CardFooter>
       </Card>
 
+      {/* Edit Password Dialog */}
       {isEditOpen && (
         <EditPasswordDialog 
           password={password}
@@ -179,6 +194,41 @@ function PasswordCard({ password }: { password: Password }) {
           onClose={() => setIsEditOpen(false)}
         />
       )}
+
+      {/* Alert Dialog for notifications */}
+      <AlertDialog open={alertOpen} onOpenChange={setAlertOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{alertMessage.title}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {alertMessage.description}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogAction>OK</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Confirm Delete Dialog */}
+      <AlertDialog open={confirmDeleteOpen} onOpenChange={setConfirmDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete this password. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex space-x-2">
+            <Button variant="outline" onClick={() => setConfirmDeleteOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   )
 }
