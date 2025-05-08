@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://passkar.vercel.app
+
+# Sitemaps
+Sitemap: https://passkar.vercel.app/sitemap.xml
